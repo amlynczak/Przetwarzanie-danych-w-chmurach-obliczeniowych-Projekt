@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dodaj Osobę</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <h1>Dodaj Osobę</h1>
+    <form id="addPersonForm">
+        <label>Imię: <input type="text" name="name" required></label><br>
+        <label>Nazwisko: <input type="text" name="surname" required></label><br>
+        <label>Płeć: 
+            <select name="gender" required>
+                <option value="male">Mężczyzna</option>
+                <option value="female">Kobieta</option>
+            </select>
+        </label><br>
+        <label>Data urodzenia: <input type="date" name="birth_date" required></label><br>
+        <label>Data śmierci: <input type="date" name="death_date"></label><br>
+        <button type="submit">Dodaj</button>
+    </form>
+    <script>
+        document.getElementById('addPersonForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const person = {
+                firstName: formData.get('name'),
+                lastName: formData.get('surname'),
+                gender: formData.get('gender'),
+                birthDate: formData.get('birth_date'),
+                deathDate: formData.get('death_date')
+            };
+            const response = await fetch('/api/person', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(person)
+            });
+            const result = await response.json();
+            alert(result.message);
+        });
+    </script>
+</body>
+</html>

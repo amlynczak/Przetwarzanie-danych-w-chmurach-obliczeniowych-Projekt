@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Małżeństwa</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body id="marriages-page">
+    <h1>Lista Małżeństw</h1>
+    <table id="marriages-table">
+        <thead>
+            <tr>
+                <th>Osoba 1</th>
+                <th>Osoba 2</th>
+                <th>Data zawarcia</th>
+            </tr>
+        </thead>
+        <tbody>
+            
+        </tbody>
+    </table>
+    <script>
+        async function fetchMarriages() {
+            console.log('Fetching marriages...');
+            const response = await fetch('/api/marriages');
+            if (!response.ok) {
+                console.error('Failed to fetch marriages:', response.statusText);
+                return;
+            }
+            const data = await response.json();
+            console.log('Marriages data:', data);
+            const tableBody = document.querySelector('#marriages-table tbody');
+            const seenMarriages = new Set();
+            if (data.marriages && data.marriages.length > 0) {
+                data.marriages.forEach(marriage => {
+                    const marriageKey = [marriage.person1, marriage.person2].sort().join('-');
+                    if (!seenMarriages.has(marriageKey)) {
+                        seenMarriages.add(marriageKey);
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${marriage.person1}</td>
+                            <td>${marriage.person2}</td>
+                            <td>${marriage.marriageDate}</td>
+                        `;
+                        tableBody.appendChild(row);
+                    }
+                });
+            } else {
+                console.log('No marriages found.');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            await fetchMarriages();
+        });
+    </script>
+</body>
+</html>

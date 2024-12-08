@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Rodzicie i dzieci</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <h1>Osoby wraz z rodzicami</h1>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Imię</th>
+                <th>Nazwisko</th>
+                <th>Ojciec</th>
+                <th>Matka</th>
+            </tr>
+        </thead>
+        <tbody id="people-table-body-parents">
+            
+        </tbody>
+    </table>
+    <script>
+        async function fetchPeople() {
+            const response = await fetch('/api/people');
+            if (!response.ok) {
+                console.error('Failed to fetch people:', response.statusText);
+                return;
+            }
+            const data = await response.json();
+            const tableBody = document.getElementById('people-table-body-parents');
+            tableBody.innerHTML = ''; // Clear existing rows
+            data.people.forEach(person => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${person.firstName}</td>
+                    <td>${person.lastName}</td>
+                    <td>${person.father}</td>
+                    <td>${person.mother}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', fetchPeople);
+    </script>
+</body>
+</html>

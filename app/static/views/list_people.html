@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista rodziny</title>
+    <link rel="stylesheet" href="../style.css">
+    <script>
+        async function fetchPeople() {
+            const response = await fetch('/api/people');
+            if (!response.ok) {
+                console.error('Failed to fetch people:', response.statusText);
+                return;
+            }
+            const data = await response.json();
+            const tableBody = document.getElementById('people-table-body');
+            tableBody.innerHTML = ''; 
+            data.people.forEach(person => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${person.firstName}</td>
+                    <td>${person.lastName}</td>
+                    <td>${person.birthDate}</td>
+                    <td>${person.deathDate}</td>
+                    <td>${person.father}</td>
+                    <td>${person.mother}</td>
+                    <td>${person.spouse}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!document.fetchPeopleInitialized) {
+                fetchPeople();
+                document.fetchPeopleInitialized = true;
+            }
+        });
+    </script>
+</head>
+<body>
+    <h1>Lista ludzi (rodzina)</h1>
+    <table id="people-table">
+        <thead>
+            <tr>
+                <th>Imię</th>
+                <th>Nazwisko</th>
+                <th>Data urodzenia</th>
+                <th>Data śmierci</th>
+                <th>Ojciec</th>
+                <th>Matka</th>
+                <th>Małżonek</th>
+            </tr>
+        </thead>
+        <tbody id="people-table-body">
+        </tbody>
+    </table>
+</body>
+</html>

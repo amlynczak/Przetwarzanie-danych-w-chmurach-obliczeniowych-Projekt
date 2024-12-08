@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modyfikacja</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <form id="modify-person-form">
+        <label for="person-id">Wybierz osobę:</label>
+        <select id="person-id" name="person-id"></select>
+        
+        <label for="first-name">Imię:</label>
+        <input type="text" id="first-name" name="first-name">
+        
+        <label for="last-name">Nazwisko:</label>
+        <input type="text" id="last-name" name="last-name">
+        
+        <label for="birth-date">Data urodzenia:</label>
+        <input type="date" id="birth-date" name="birth-date">
+        
+        <label for="death-date">Data śmierci:</label>
+        <input type="date" id="death-date" name="death-date">
+        
+        <input type="hidden" id="gender" name="gender">
+        
+        <button type="submit">Zmodyfikuj</button>
+    </form>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            await populatePeopleDropdown('person-id');
+            document.getElementById('person-id').addEventListener('change', async (event) => {
+                const personId = event.target.value;
+                await populatePersonFields(personId);
+            });
+        });
+
+        async function populatePeopleDropdown(selectId) {
+            const response = await fetch('/api/people');
+            if (!response.ok) {
+                console.error('Failed to fetch people:', response.statusText);
+                return;
+            }
+            const data = await response.json();
+            const select = document.getElementById(selectId);
+            data.people.forEach(person => {
+                const option = document.createElement('option');
+                option.value = person.id;
+                option.textContent = `${person.firstName} ${person.lastName}`;
+                select.appendChild(option);
+            });
+        }
+
+        async function populatePersonFields(personId) {
+            const response = await fetch(`/api/person/${personId}`);
+            if (!response.ok) {
+                console.error('Failed to fetch person:', response.statusText);
+                return;
+            }
+            const person = await response.json();
+            document.getElementById('first-name').value = person.firstName;
+            document.getElementById('last-name').value = person.lastName;
+            document.getElementById('birth-date').value = person.birthDate;
+            document.getElementById('death-date').value = person.deathDate;
+            document.getElementById('gender').value = person.gender;
+        }
+
+        document.getElementById('modify-person-form').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const personId = document.getElementById('person-id').value;
+            const firstName = document.getElementById('first-name').value;
+            const lastName = document.getElementById('last-name').value;
+            const birthDate = document.getElementById('birth-date').value;
+            const deathDate = document.getElementById('death-date').value;
+            const gender = document.getElementById('gender').value;
+            await modifyPerson(personId, { firstName, lastName, birthDate, deathDate, gender });
+        });
+
+        async function modifyPerson(personId, personData) {
+            const response = await fetch(`/api/person/${personId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(personData)
+            });
+            const data = await response.json();
+            console.log(data.message);
+        }
+    </script>
+</body>
+</html>

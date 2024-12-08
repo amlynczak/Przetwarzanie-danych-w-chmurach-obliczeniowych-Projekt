@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rodzeństwo</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <h1>Lista rodzeństw</h1>
+    <table id="siblings-table" border="1">
+        <thead>
+            <tr>
+                <th>Osoba 1</th>
+                <th>Osoba 2</th>
+            </tr>
+        </thead>
+        <tbody>
+            
+        </tbody>
+    </table>
+    <script>
+        async function fetchSiblings() {
+            const response = await fetch(`/api/siblings`);
+            const data = await response.json();
+            const siblingsTable = document.getElementById('siblings-table').getElementsByTagName('tbody')[0];
+            const siblingsSet = new Set();
+
+            data.siblings.forEach(sibling => {
+                const siblingPair = [sibling.sibling1, sibling.sibling2].sort().join('-');
+                if (!siblingsSet.has(siblingPair)) {
+                    siblingsSet.add(siblingPair);
+                    const row = siblingsTable.insertRow();
+                    const person1Cell = row.insertCell(0);
+                    const person2Cell = row.insertCell(1);
+                    person1Cell.textContent = sibling.sibling1;
+                    person2Cell.textContent = sibling.sibling2;
+                }
+            });
+        }
+        fetchSiblings();
+    </script>
+</body>
+</html>

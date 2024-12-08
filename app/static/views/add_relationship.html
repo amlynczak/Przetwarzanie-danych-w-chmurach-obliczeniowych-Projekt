@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dodaj relację</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <h1>Dodaj relację</h1>
+    <form id="add-relationship-form">
+        <label for="person-id">Osoba 1:</label>
+        <select id="person1-id" name="person1-id" required>
+
+        </select>
+        <label for="person2-id">Osoba 2:</label>
+        <select id="person2-id" name="person2-id" required>
+
+        </select>
+        <label for="relationship-type">Typ relacji:</label>
+        <select id="relationship-type" name="relationship-type" required>
+            <option value="parent">Rodzicielstwo</option>
+            <option value="spouse">Małżeństwo</option>
+        </select>
+        <div id="marriage-date-container" style="display: none;">
+            <label for="marriage-date">Data zawarcia:</label>
+            <input type="date" id="marriage-date" name="marriage-date">
+        </div>
+        <input type="hidden" name="person1_id" id="hidden-person1-id">
+        <input type="hidden" name="person2_id" id="hidden-person2-id">
+        <button type="submit">Dodaj relację</button>
+    </form>
+    <script>
+        async function populatePeopleDropdown(selectId) {
+            const response = await fetch('/api/people');
+            if (!response.ok) {
+                console.error('Failed to fetch people:', response.statusText);
+                return;
+            }
+            const data = await response.json();
+            const select = document.getElementById(selectId);
+            data.people.forEach(person => {
+                const option = document.createElement('option');
+                option.value = person.id;
+                option.textContent = `${person.firstName} ${person.lastName}`;
+                select.appendChild(option);
+            });
+        }
+
+        async function createRelationship(person1Id, person2Id, relationshipType, marriageDate) {
+            const formData = new FormData();
+            formData.append('person1_id', person1Id);
+            formData.append('person2_id', person2Id);
+            formData.append('relationship_type', relationshipType);
+            if (marriageDate) {
+                formData.append('marriage_date', marriageDate);
+            }
+
+            const response = await fetch('/api/relationship', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await response.json();
+            console.log(data.message);
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            await populatePeopleDropdown('person1-id');
+            await populatePeopleDropdown('person2-id');
+
+            document.getElementById('relationship-type').addEventListener('change', (event) => {
+                const marriageDateContainer = document.getElementById('marriage-date-container');
+                if (event.target.value === 'spouse') {
+                    marriageDateContainer.style.display = 'block';
+                } else {
+                    marriageDateContainer.style.display = 'none';
+                }
+            });
+        });
+
+        document.getElementById('add-relationship-form').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const person1Id = document.getElementById('person1-id').value;
+            const person2Id = document.getElementById('person2-id').value;
+            const relationshipType = document.getElementById('relationship-type').value;
+            const marriageDate = document.getElementById('marriage-date').value;
+            document.getElementById('hidden-person1-id').value = person1Id;
+            document.getElementById('hidden-person2-id').value = person2Id;
+            await createRelationship(person1Id, person2Id, relationshipType, marriageDate);
+        });
+    </script>
+</body>
+</html>
